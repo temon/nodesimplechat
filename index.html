@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; }
+        .form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; display: flex; }
+        .form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+        .form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+        #to { width: 14%;-webkit-appearance: none; -moz-appearance: none; display: block; padding: 0.4rem; color: #969696; border: 0; border-radius: 0; border-right: 1px solid #4b4b4b; background: #fff url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20version%3D%221.1%22%20width%3D%2232%22%20height%3D%2224%22%20viewBox%3D%220%200%2032%2024%22%3E%3Cpolygon%20points%3D%220%2C0%2032%2C0%2016%2C24%22%20style%3D%22fill%3A%20black%22%3E%3C/polygon%3E%3C/svg%3E") right 10px center no-repeat; background-size: 8px 8px; padding-right: 1.625rem; font-size: 14px; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+    </style>
+</head>
+<body>
+<ul id="messages"></ul>
+<form action="" class="form">
+    <select id="to">
+        <option value="all">All</option>
+    </select>
+    <input id="input-message" autocomplete="off" />
+    <button id="send-button">Send</button>
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script>
+    const socket = io();
+    jQuery(document).ready(() => {
+        jQuery('#send-button').click((event)=>{
+            event.preventDefault();
+            const inputValue = jQuery('#input-message').val();
+            const selectValue = jQuery('#to').val();
+            console.log(inputValue);
+
+            // send message to server
+            socket.emit('send-message', {
+                to: selectValue,
+                message: inputValue
+            });
+
+            jQuery('#input-message').val('');
+        });
+
+        // subscribe message from server
+        socket.on('message-from-server', (message) => {
+            console.log(message);
+            jQuery('#messages').append('<li>'+ message +'</li>');
+        });
+
+        // update client connected
+        socket.on('client-change', (clients) => {
+            console.log(clients);
+            jQuery('.clients').remove();
+            clients.forEach((client)=>{
+                jQuery('#to').append(`<option class ='clients' value="${client}"> ${client} </option>`);
+            });
+        });
+    });
+</script>
+</body>
+</html>
