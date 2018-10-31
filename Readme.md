@@ -1,1 +1,1 @@
-Try build simple chat apps using node js and web socket.
+Simple chat apps using node js and web socket.
